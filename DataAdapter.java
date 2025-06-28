@@ -12,9 +12,4 @@ public class DataAdapter {
         }
         return formatter.format(data);
     }
-
-    // Método para converter de String de volta para Date, se necessário
-    // public static Date parseData(String dataString) throws ParseException {
-    //     return formatter.parse(dataString);
-    // }
 }

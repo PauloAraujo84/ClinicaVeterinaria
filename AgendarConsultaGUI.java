@@ -180,24 +180,18 @@ public class AgendarConsultaGUI extends JFrame {
         Pet petSelecionado = (Pet) cbPet.getSelectedItem();
         Cliente clienteSelecionado = (Cliente) cbCliente.getSelectedItem();
         Veterinario veterinarioSelecionado = (Veterinario) cbVeterinario.getSelectedItem();
-        Date dataSelecionada = (Date) spDataHora.getValue(); // Obtém a data e hora do JSpinner
+        Date dataSelecionada = (Date) spDataHora.getValue();
 
-        // --- Validação dos dados de entrada ---
-        // Verifica se algum dos itens selecionados (ou a data) é nulo.
-        // O método getSelectedItem() de um JComboBox pode retornar null se a lista estiver vazia.
         if (petSelecionado == null || clienteSelecionado == null || veterinarioSelecionado == null || dataSelecionada == null) {
             JOptionPane.showMessageDialog(this, "Por favor, preencha todos os campos e selecione os itens.", "Erro de Agendamento", JOptionPane.ERROR_MESSAGE);
-            return; // Sai do método se a validação falhar, impedindo o agendamento
+            return;
         }
-
-        // --- Chama a lógica de negócio através da fachada ---
         facade.agendarConsulta(petSelecionado, clienteSelecionado, veterinarioSelecionado, dataSelecionada);
 
-        // Exibe mensagem de sucesso
         JOptionPane.showMessageDialog(this,
                 "Consulta agendada com sucesso para " + petSelecionado.getNome() + " em " + DataAdapter.formatarData(dataSelecionada) + "!",
                 "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
-        dispose(); // Fecha a janela após o agendamento bem-sucedido
+        dispose();
     }
 }

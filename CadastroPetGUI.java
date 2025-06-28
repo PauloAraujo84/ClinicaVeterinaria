@@ -1,145 +1,134 @@
 package br.com.veterinaria.gui;
 
 import br.com.veterinaria.facade.ClinicaFacade;
+import br.com.veterinaria.model.Cliente;
 import br.com.veterinaria.model.Pet;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class CadastroPetGUI extends JFrame {
+    private ClinicaFacade facade;
+
     private JTextField txtNome;
     private JTextField txtEspecie;
     private JTextField txtRaca;
     private JTextField txtIdade;
-    private JButton btnSalvar;
-    private JButton btnCancelar;
-
-    private ClinicaFacade facade;
+    private JComboBox<Cliente> cmbProprietario; // NOVO: ComboBox para selecionar o proprietário
+    private JButton btnCadastrar;
 
     public CadastroPetGUI(ClinicaFacade facade) {
         this.facade = facade;
-        setTitle("Cadastro de Pet");
+        setTitle("Cadastrar Novo Pet");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(null); // Centraliza a janela
 
         initComponents();
+        loadProprietarios(); // Carrega os clientes no ComboBox
         addListeners();
     }
 
     private void initComponents() {
-        // ... (código initComponents existente) ...
-        JPanel panel = new JPanel(new GridBagLayout()); // Usando GridBagLayout para um layout flexível
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Espaçamento interno
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); // Margem entre componentes
+        // Ajustamos o layout para acomodar o novo campo "Proprietário"
+        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10)); // Agora 6 linhas para 5 campos + 1 botão
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Rótulos e campos de texto
-        gbc.gridx = 0; // Coluna 0
-        gbc.gridy = 0; // Linha 0
-        panel.add(new JLabel("Nome:"), gbc);
-        gbc.gridy++;
-        panel.add(new JLabel("Espécie:"), gbc);
-        gbc.gridy++;
-        panel.add(new JLabel("Raça:"), gbc);
-        gbc.gridy++;
-        panel.add(new JLabel("Idade:"), gbc);
+        panel.add(new JLabel("Nome:"));
+        txtNome = new JTextField();
+        panel.add(txtNome);
 
-        gbc.gridx = 1; // Coluna 1
-        gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL; // Preenche horizontalmente
-        gbc.weightx = 1.0; // Pesa mais na distribuição horizontal de espaço
-        txtNome = new JTextField(20);
-        panel.add(txtNome, gbc);
-        gbc.gridy++;
-        txtEspecie = new JTextField(20);
-        panel.add(txtEspecie, gbc);
-        gbc.gridy++;
-        txtRaca = new JTextField(20);
-        panel.add(txtRaca, gbc);
-        gbc.gridy++;
-        txtIdade = new JTextField(20);
-        panel.add(txtIdade, gbc);
+        panel.add(new JLabel("Espécie:"));
+        txtEspecie = new JTextField();
+        panel.add(txtEspecie);
 
-        // Botões
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.gridwidth = 2; // Ocupa duas colunas
-        gbc.fill = GridBagConstraints.NONE; // Não preenche
-        gbc.anchor = GridBagConstraints.CENTER; // Centraliza
+        panel.add(new JLabel("Raça:"));
+        txtRaca = new JTextField();
+        panel.add(txtRaca);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10)); // Painel para os botões
-        btnSalvar = new JButton("Salvar");
-        btnCancelar = new JButton("Cancelar");
-        buttonPanel.add(btnSalvar);
-        buttonPanel.add(btnCancelar);
-        panel.add(buttonPanel, gbc);
+        panel.add(new JLabel("Idade:"));
+        txtIdade = new JTextField();
+        panel.add(txtIdade);
+
+        // NOVO: Campo e ComboBox para Proprietário
+        panel.add(new JLabel("Proprietário:"));
+        cmbProprietario = new JComboBox<>();
+        panel.add(cmbProprietario);
+
+        btnCadastrar = new JButton("Cadastrar Pet");
+        // O botão ocupa as duas colunas na última linha
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(btnCadastrar);
+        panel.add(new JLabel("")); // Espaçador para o GridLayout
+        panel.add(btnCadastrar); // Adiciona o botão
 
         add(panel, BorderLayout.CENTER);
     }
 
+    /**
+     * Carrega a lista de clientes cadastrados no ComboBox de proprietários.
+     */
+    private void loadProprietarios() {
+        List<Cliente> clientes = facade.getClientesCadastrados();
+        if (clientes.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Não há clientes cadastrados. Por favor, cadastre um cliente primeiro.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            btnCadastrar.setEnabled(false); // Desabilita o botão de cadastro se não houver clientes
+            return;
+        }
+        for (Cliente cliente : clientes) {
+            cmbProprietario.addItem(cliente);
+        }
+    }
+
     private void addListeners() {
-        // ... (código addListeners existente) ...
-        btnSalvar.addActionListener(new ActionListener() {
+        btnCadastrar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                salvarPet();
-            }
-        });
-
-        btnCancelar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
+                cadastrarPet();
             }
         });
     }
 
-    private void salvarPet() {
-        String nome = txtNome.getText();
-        String especie = txtEspecie.getText();
-        String raca = txtRaca.getText();
+    private void cadastrarPet() {
+        String nome = txtNome.getText().trim();
+        String especie = txtEspecie.getText().trim();
+        String raca = txtRaca.getText().trim();
+        String idadeStr = txtIdade.getText().trim();
+        // OBTÉM O CLIENTE SELECIONADO NO COMBOBOX
+        Cliente proprietario = (Cliente) cmbProprietario.getSelectedItem();
+
+        // Validação de campos obrigatórios
+        if (nome.isEmpty() || especie.isEmpty() || raca.isEmpty() || idadeStr.isEmpty() || proprietario == null) {
+            JOptionPane.showMessageDialog(this, "Todos os campos e o proprietário são obrigatórios.", "Erro de Cadastro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         int idade;
-
         try {
-            idade = Integer.parseInt(txtIdade.getText());
+            idade = Integer.parseInt(idadeStr);
+            if (idade <= 0) {
+                throw new NumberFormatException(); // Idade deve ser positiva
+            }
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Idade deve ser um número válido.", "Erro de Entrada", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Idade deve ser um número inteiro positivo.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        if (nome.isEmpty() || especie.isEmpty() || raca.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos os campos devem ser preenchidos.", "Campos Vazios", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+        // Cria o objeto Pet, AGORA PASSANDO O PROPRIETÁRIO CORRETAMENTE
+        Pet novoPet = new Pet(nome, especie, raca, idade, proprietario);
 
-        Pet novoPet = new Pet(nome, especie, raca, idade);
-
-        // --- CHAMA O NOVO MÉTODO CADASTRARPET DA FACHADA ---
         facade.cadastrarPet(novoPet);
-        // ----------------------------------------------------
+        JOptionPane.showMessageDialog(this, "Pet cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
-        JOptionPane.showMessageDialog(this, "Pet " + novoPet.getNome() + " salvo com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-
-        limparCampos();
-    }
-
-    private void limparCampos() {
+        // Limpa os campos após o cadastro bem-sucedido
         txtNome.setText("");
         txtEspecie.setText("");
         txtRaca.setText("");
         txtIdade.setText("");
+        // Não é necessário resetar o cmbProprietario a menos que você queira que ele volte a "nenhum selecionado"
+        // cmbProprietario.setSelectedIndex(0); // Pode ser usado se houver um item "Selecione"
     }
-
-    // O método main de teste pode ser removido ou mantido, mas não é usado pela aplicação principal.
-    /*
-    public static void main(String[] args) {
-        ClinicaFacade mockFacade = new ClinicaFacade();
-        SwingUtilities.invokeLater(() -> {
-            new CadastroPetGUI(mockFacade).setVisible(true);
-        });
-    }
-    */
 }
