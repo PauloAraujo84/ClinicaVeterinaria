@@ -38,11 +38,7 @@ public class Cliente {
     }
 
     @Override
-    public String toString() {
-        return "Cliente{" +
-                "nome='" + nome + '\'' +
-                ", endereco='" + endereco + '\'' +
-                ", telefone='" + telefone + '\'' +
-                '}';
+       public String toString() {
+        return nome; // Para que o JComboBox mostre apenas o nome do cliente
     }
 }

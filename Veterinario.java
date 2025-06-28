@@ -29,9 +29,6 @@ public class Veterinario {
 
     @Override
     public String toString() {
-        return "Veterinario{" +
-                "nome='" + nome + '\'' +
-                ", especialidade='" + especialidade + '\'' +
-                '}';
+        return nome; // Para que o JComboBox mostre apenas o nome do veterinário
     }
 }
