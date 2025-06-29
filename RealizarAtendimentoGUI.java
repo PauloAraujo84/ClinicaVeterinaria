@@ -3,28 +3,30 @@ package br.com.veterinaria.gui;
 import br.com.veterinaria.facade.ClinicaFacade;
 import br.com.veterinaria.model.Consulta;
 import br.com.veterinaria.model.Medicamento;
-import br.com.veterinaria.model.Prescricao; // Importar Prescricao
+import br.com.veterinaria.model.Prescricao;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RealizarAtendimentoGUI extends JFrame {
     private ClinicaFacade facade;
 
-    private JComboBox<Consulta> cbConsulta;
-    private JTextArea taDiagnostico;
-    private JTextArea taMedicamentos;
-    private JButton btnRealizarAtendimento;
-    private JButton btnCancelar;
+    private JComboBox<ConsultaComboBoxItem> cmbConsulta; // Changed to use ConsultaComboBoxItem directly
+    private JTextArea txtDiagnostico;
+    private JTextArea txtMedicamentos;
+    private JButton btnFinalizarAtendimento;
+
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
     public RealizarAtendimentoGUI(ClinicaFacade facade) {
         this.facade = facade;
-        setTitle("Realizar Atendimento");
-        setSize(500, 450);
+        setTitle("Realizar Atendimento Veterinário");
+        setSize(550, 450);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -34,140 +36,115 @@ public class RealizarAtendimentoGUI extends JFrame {
     }
 
     private void initComponents() {
-        // ... (código initComponents existente, sem alterações aqui) ...
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Seleção de Consulta
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(new JLabel("Selecionar Consulta:"), gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 1.0;
-        cbConsulta = new JComboBox<>();
-        panel.add(cbConsulta, gbc);
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Detalhes do Atendimento"));
 
-        // Diagnóstico
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.gridwidth = 2;
-        panel.add(new JLabel("Diagnóstico:"), gbc);
-        gbc.gridy++;
-        taDiagnostico = new JTextArea(5, 30);
-        taDiagnostico.setLineWrap(true);
-        taDiagnostico.setWrapStyleWord(true);
-        JScrollPane scrollDiagnostico = new JScrollPane(taDiagnostico);
-        panel.add(scrollDiagnostico, gbc);
+        formPanel.add(new JLabel("Selecionar Consulta:"));
+        cmbConsulta = new JComboBox<>(); // This JComboBox now holds ConsultaComboBoxItem objects
+        formPanel.add(cmbConsulta);
 
-        // Medicamentos
-        gbc.gridy++;
-        panel.add(new JLabel("Medicamentos (separados por vírgula, ex: 'Remédio A 10mg, Remédio B 5ml'):"), gbc);
-        gbc.gridy++;
-        taMedicamentos = new JTextArea(4, 30);
-        taMedicamentos.setLineWrap(true);
-        taMedicamentos.setWrapStyleWord(true);
-        JScrollPane scrollMedicamentos = new JScrollPane(taMedicamentos);
-        panel.add(scrollMedicamentos, gbc);
+        formPanel.add(new JLabel("Diagnóstico:"));
+        txtDiagnostico = new JTextArea(5, 20);
+        JScrollPane scrollDiagnostico = new JScrollPane(txtDiagnostico);
+        formPanel.add(scrollDiagnostico);
 
-        // Painel de Botões
-        gbc.gridy++;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER;
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        btnRealizarAtendimento = new JButton("Realizar Atendimento");
-        btnCancelar = new JButton("Cancelar");
-        buttonPanel.add(btnRealizarAtendimento);
-        buttonPanel.add(btnCancelar);
-        panel.add(buttonPanel, gbc);
+        formPanel.add(new JLabel("Medicamentos (um por linha/separados por vírgula):"));
+        txtMedicamentos = new JTextArea(5, 20);
+        JScrollPane scrollMedicamentos = new JScrollPane(txtMedicamentos);
+        formPanel.add(scrollMedicamentos);
 
-        add(panel, BorderLayout.CENTER);
+        btnFinalizarAtendimento = new JButton("Finalizar Atendimento e Gerar Prescrição");
+        formPanel.add(new JLabel(""));
+        formPanel.add(btnFinalizarAtendimento);
+
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+        add(mainPanel);
     }
 
     private void loadConsultas() {
-        // ... (código loadConsultas existente, sem alterações aqui) ...
+        cmbConsulta.removeAllItems();
         List<Consulta> consultas = facade.buscarTodasAsConsultas();
+
         if (consultas.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Não há consultas agendadas para atendimento.", "Sem Consultas", JOptionPane.INFORMATION_MESSAGE);
-            btnRealizarAtendimento.setEnabled(false);
+            JOptionPane.showMessageDialog(this, "Não há consultas agendadas para atendimento.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            btnFinalizarAtendimento.setEnabled(false);
             return;
         }
-        for (Consulta c : consultas) {
-            cbConsulta.addItem(c);
+
+        for (Consulta consulta : consultas) {
+            cmbConsulta.addItem(new ConsultaComboBoxItem(consulta));
         }
-        cbConsulta.setSelectedIndex(0);
     }
 
     private void addListeners() {
-        // ... (código addListeners existente, sem alterações aqui) ...
-        btnRealizarAtendimento.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                realizarAtendimento();
-            }
-        });
-
-        btnCancelar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
+        btnFinalizarAtendimento.addActionListener(e -> finalizarAtendimento());
     }
 
-    private void realizarAtendimento() {
-        Consulta consultaSelecionada = (Consulta) cbConsulta.getSelectedItem();
-        String diagnosticoDescricao = taDiagnostico.getText().trim();
-        String medicamentosTexto = taMedicamentos.getText().trim();
+    private void finalizarAtendimento() {
+        ConsultaComboBoxItem selectedItem = (ConsultaComboBoxItem) cmbConsulta.getSelectedItem();
 
-        if (consultaSelecionada == null) {
-            JOptionPane.showMessageDialog(this, "Por favor, selecione uma consulta.", "Erro", JOptionPane.ERROR_MESSAGE);
+        if (selectedItem == null) {
+            JOptionPane.showMessageDialog(this, "Selecione uma consulta para finalizar.", "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        // --- THE CRITICAL FIX IS HERE ---
+        // Get the actual Consulta object from the wrapper
+        Consulta consultaSelecionada = selectedItem.getConsulta();
+
+        String diagnosticoDescricao = txtDiagnostico.getText().trim();
+        String medicamentosTexto = txtMedicamentos.getText().trim();
+
         if (diagnosticoDescricao.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Por favor, insira o diagnóstico.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "O campo Diagnóstico é obrigatório.", "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         List<Medicamento> medicamentos = new ArrayList<>();
         if (!medicamentosTexto.isEmpty()) {
-            String[] medsArray = medicamentosTexto.split(",");
-            for (String medEntry : medsArray) {
-                String trimmedMedEntry = medEntry.trim();
-                if (!trimmedMedEntry.isEmpty()) {
-                    String nome = trimmedMedEntry;
-                    String dosagem = "";
-
-                    int lastSpace = trimmedMedEntry.lastIndexOf(" ");
-                    if (lastSpace != -1 && trimmedMedEntry.substring(lastSpace + 1).matches(".*\\d+.*")) {
-                        nome = trimmedMedEntry.substring(0, lastSpace).trim();
-                        dosagem = trimmedMedEntry.substring(lastSpace + 1).trim();
-                    }
-
-                    medicamentos.add(new Medicamento(nome, dosagem));
+            String[] medsArray = medicamentosTexto.split("[,\\n]");
+            for (String medName : medsArray) {
+                String trimmedMedName = medName.trim();
+                if (!trimmedMedName.isEmpty()) {
+                    medicamentos.add(new Medicamento(trimmedMedName, "Descrição Padrão", "1x ao dia"));
                 }
             }
         }
 
-        // CHAMA O MÉTODO DA FACHADA E CAPTURA A PRESCRICAO RETORNADA
         Prescricao prescricaoGerada = facade.realizarAtendimento(consultaSelecionada, diagnosticoDescricao, medicamentos);
 
-        JOptionPane.showMessageDialog(this, "Atendimento para " + consultaSelecionada.getPet().getNome() + " registrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this,
+                "Atendimento finalizado com sucesso!\nDiagnóstico: " + prescricaoGerada.getDiagnostico().getDescricao() +
+                        "\nMedicamentos Prescritos: " + prescricaoGerada.getMedicamentos().size(),
+                "Atendimento Concluído", JOptionPane.INFORMATION_MESSAGE);
 
-        // PERGUNTA AO USUÁRIO SE DESEJA VISUALIZAR A PRESCRIÇÃO
-        int dialogResult = JOptionPane.showConfirmDialog(this,
-                "Atendimento registrado. Deseja visualizar a prescrição?",
-                "Visualizar Prescrição", JOptionPane.YES_NO_OPTION);
+        txtDiagnostico.setText("");
+        txtMedicamentos.setText("");
+        // Consider refreshing the list of consultations if the attended one should disappear
+        // loadConsultas();
+    }
 
-        if (dialogResult == JOptionPane.YES_OPTION) {
-            // Abre a PrescricaoGUI passando a prescrição gerada
-            SwingUtilities.invokeLater(() -> {
-                new PrescricaoGUI(prescricaoGerada).setVisible(true);
-            });
+    private class ConsultaComboBoxItem {
+        private Consulta consulta;
+
+        public ConsultaComboBoxItem(Consulta consulta) {
+            this.consulta = consulta;
         }
 
-        dispose(); // Fecha a janela RealizarAtendimentoGUI
+        public Consulta getConsulta() {
+            return consulta; // This method is crucial for extracting the actual Consulta
+        }
+
+        @Override
+        public String toString() {
+            return "ID: " + consulta.getId() +
+                    " | Pet: " + consulta.getPet().getNome() +
+                    " (" + consulta.getCliente().getNome() + ")" +
+                    " | Vet: " + consulta.getVeterinario().getNome() +
+                    " | Data: " + dateFormat.format(consulta.getData());
+        }
     }
 }

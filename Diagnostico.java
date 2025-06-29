@@ -1,37 +1,27 @@
 package br.com.veterinaria.model;
 
 public class Diagnostico {
-    private Consulta consulta;
-    private String descricao;
+    private static int nextId = 1;
+    private int id;
+    private Consulta consulta; // A qual consulta este diagnóstico se refere
+    private String descricao;  // A descrição detalhada do diagnóstico
 
     public Diagnostico(Consulta consulta, String descricao) {
+        this.id = nextId++;
         this.consulta = consulta;
         this.descricao = descricao;
     }
 
-    // Getters
-    public Consulta getConsulta() {
-        return consulta;
-    }
+    public int getId() { return id; }
+    public Consulta getConsulta() { return consulta; }
+    public String getDescricao() { return descricao; }
 
-    public String getDescricao() {
-        return descricao;
-    }
-
-    // Setters
-    public void setConsulta(Consulta consulta) {
-        this.consulta = consulta;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
+    public void setId(int id) { this.id = id; }
+    public void setConsulta(Consulta consulta) { this.consulta = consulta; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
 
     @Override
     public String toString() {
-        return "Diagnostico{" +
-                "consulta=" + consulta.getId() + // Referência ao ID da consulta
-                ", descricao='" + descricao + '\'' +
-                '}';
+        return "Diagnóstico [ID=" + id + ", Consulta=" + consulta.getId() + ", Descrição=" + descricao + "]";
     }
 }

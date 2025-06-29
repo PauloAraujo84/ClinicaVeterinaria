@@ -11,11 +11,10 @@ public class MenuPrincipalGUI extends JFrame {
     private ClinicaFacade facade;
 
     // Declaração dos botões como atributos da classe
-    private JButton btnCadastrarCliente;
+    // Os botões btnCadastrarCliente e btnCadastrarPet foram removidos daqui
     private JButton btnGerenciarClientes;
-    private JButton btnCadastrarPet;
     private JButton btnGerenciarPets;
-    private JButton btnGerenciarVeterinarios; // Variável para o botão "Gerenciar Veterinários"
+    private JButton btnGerenciarVeterinarios;
     private JButton btnAgendarConsulta;
     private JButton btnRealizarAtendimento;
 
@@ -26,12 +25,12 @@ public class MenuPrincipalGUI extends JFrame {
     public MenuPrincipalGUI(ClinicaFacade facade) {
         this.facade = facade;
         setTitle("Sistema de Gestão de Clínica Veterinária");
-        setSize(400, 450); // Ajustado o tamanho para acomodar mais botões
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Fecha a aplicação ao fechar esta janela
-        setLocationRelativeTo(null); // Centraliza a janela na tela
+        setSize(400, 400); // Tamanho ajustado, pois há menos botões
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-        initComponents(); // Inicializa os componentes da interface
-        addListeners();   // Adiciona os ouvintes de eventos aos botões
+        initComponents();
+        addListeners();
     }
 
     /**
@@ -39,29 +38,24 @@ public class MenuPrincipalGUI extends JFrame {
      */
     private void initComponents() {
         JPanel panel = new JPanel();
-        // Layout de grade para organizar os botões verticalmente
-        panel.setLayout(new GridLayout(7, 1, 10, 10)); // 7 linhas para 7 botões, com espaçamento
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Margem interna
+        // O GridLayout agora terá menos linhas, pois alguns botões foram removidos
+        panel.setLayout(new GridLayout(5, 1, 10, 10)); // 5 linhas para os 5 botões restantes
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Inicialização de cada botão
-        btnCadastrarCliente = new JButton("Cadastrar Cliente");
-        btnGerenciarClientes = new JButton("Gerenciar Clientes");
-        btnCadastrarPet = new JButton("Cadastrar Pet");
-        btnGerenciarPets = new JButton("Gerenciar Pets");
-        btnGerenciarVeterinarios = new JButton("Gerenciar Veterinários"); // Inicialização do botão
-        btnAgendarConsulta = new JButton("Agendar Consulta");
+        // Inicialização dos botões restantes
+        btnGerenciarClientes = new JButton("Gerenciar Clientes (Adicionar/Remover)"); // Nome do botão atualizado
+        btnGerenciarPets = new JButton("Gerenciar Pets (Adicionar/Remover)");       // Nome do botão atualizado
+        btnGerenciarVeterinarios = new JButton("Gerenciar Veterinários (Adicionar/Remover)");
+        btnAgendarConsulta = new JButton("Agendar/Gerenciar Consultas");
         btnRealizarAtendimento = new JButton("Realizar Atendimento");
 
         // Adição dos botões ao painel
-        panel.add(btnCadastrarCliente);
         panel.add(btnGerenciarClientes);
-        panel.add(btnCadastrarPet);
         panel.add(btnGerenciarPets);
-        panel.add(btnGerenciarVeterinarios); // Adição do botão ao painel
+        panel.add(btnGerenciarVeterinarios);
         panel.add(btnAgendarConsulta);
         panel.add(btnRealizarAtendimento);
 
-        // Adiciona o painel principal à janela
         add(panel, BorderLayout.CENTER);
     }
 
@@ -69,39 +63,27 @@ public class MenuPrincipalGUI extends JFrame {
      * Adiciona os ActionListeners a cada botão para definir suas ações.
      */
     private void addListeners() {
-        btnCadastrarCliente.addActionListener(e -> {
-            // Exemplo: new CadastroClienteGUI(facade).setVisible(true);
-            JOptionPane.showMessageDialog(this, "Funcionalidade 'Cadastrar Cliente' em desenvolvimento.", "Info", JOptionPane.INFORMATION_MESSAGE);
-        });
+        // O listener para btnCadastrarCliente foi removido
+        // O listener para btnCadastrarPet foi removido
 
         btnGerenciarClientes.addActionListener(e -> {
-            // Exemplo: new GerenciarClientesGUI(facade).setVisible(true);
-            JOptionPane.showMessageDialog(this, "Funcionalidade 'Gerenciar Clientes' em desenvolvimento.", "Info", JOptionPane.INFORMATION_MESSAGE);
-        });
-
-        btnCadastrarPet.addActionListener(e -> {
-            new CadastroPetGUI(facade).setVisible(true);
+            new GerenciarClientesGUI(facade).setVisible(true);
         });
 
         btnGerenciarPets.addActionListener(e -> {
-            // Exemplo: new GerenciarPetsGUI(facade).setVisible(true);
-            JOptionPane.showMessageDialog(this, "Funcionalidade 'Gerenciar Pets' em desenvolvimento.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            new GerenciarPetsGUI(facade).setVisible(true);
         });
 
-        // Listener para o botão "Gerenciar Veterinários"
         btnGerenciarVeterinarios.addActionListener(e -> {
-            GerenciarVeterinariosGUI gerenciarVeterinariosGUI = new GerenciarVeterinariosGUI(facade);
-            gerenciarVeterinariosGUI.setVisible(true);
+            new GerenciarVeterinariosGUI(facade).setVisible(true);
         });
 
         btnAgendarConsulta.addActionListener(e -> {
-            // Exemplo: new AgendarConsultaGUI(facade).setVisible(true);
-            JOptionPane.showMessageDialog(this, "Funcionalidade 'Agendar Consulta' em desenvolvimento.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            new AgendarConsultaGUI(facade).setVisible(true);
         });
 
         btnRealizarAtendimento.addActionListener(e -> {
-            // Exemplo: new RealizarAtendimentoGUI(facade).setVisible(true);
-            JOptionPane.showMessageDialog(this, "Funcionalidade 'Realizar Atendimento' em desenvolvimento.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            new RealizarAtendimentoGUI(facade).setVisible(true);
         });
     }
 
@@ -110,10 +92,7 @@ public class MenuPrincipalGUI extends JFrame {
      * @param args Argumentos da linha de comando (não utilizados neste caso).
      */
     public static void main(String[] args) {
-        // Inicializa a fachada (que carrega os dados de exemplo)
         ClinicaFacade facade = new ClinicaFacade();
-
-        // Garante que a GUI seja criada e atualizada na Thread de Despacho de Eventos (EDT)
         SwingUtilities.invokeLater(() -> {
             new MenuPrincipalGUI(facade).setVisible(true);
         });

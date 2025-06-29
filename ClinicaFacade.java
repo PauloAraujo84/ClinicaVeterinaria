@@ -114,7 +114,41 @@ public class ClinicaFacade {
         clienteDAO.adicionar(cliente);
         System.out.println("[Facade] Cliente '" + cliente.getNome() + "' cadastrado.");
     }
+// ... dentro da classe ClinicaFacade { ...
 
+    // --- Métodos para Gerenciar Consultas ---
+
+    /**
+     * Agenda uma nova consulta no sistema.
+     * @param pet O pet da consulta.
+     * @param cliente O cliente (proprietário) do pet.
+     * @param veterinario O veterinário responsável pela consulta.
+     * @param data A data e hora da consulta.
+     */
+    public void agendarConsulta(Pet pet, Cliente cliente, Veterinario veterinario, Date data) {
+        Consulta novaConsulta = new Consulta(pet, cliente, veterinario, data);
+        consultaDAO.adicionar(novaConsulta);
+        System.out.println("[Facade] Consulta agendada para '" + pet.getNome() + "' em " + data);
+    }
+
+    /**
+     * Busca e retorna uma lista de todas as consultas agendadas.
+     * @return Uma lista de objetos Consulta.
+     */
+    public List<Consulta> buscarTodasAsConsultas() {
+        return consultaDAO.listarTodos();
+    }
+
+    /**
+     * Remove uma consulta do sistema.
+     * @param consulta O objeto Consulta a ser removido.
+     */
+    public void removerConsulta(Consulta consulta) {
+        consultaDAO.remover(consulta);
+        System.out.println("[Facade] Consulta para Pet '" + consulta.getPet().getNome() + "' em " + consulta.getData() + " removida.");
+    }
+
+// ... } // Fim da classe ClinicaFacade
     /**
      * Retorna uma lista de todos os clientes (proprietários) cadastrados.
      * @return Uma lista de objetos Cliente.
@@ -170,19 +204,6 @@ public class ClinicaFacade {
      * @param veterinario O veterinário responsável pela consulta.
      * @param data A data e hora da consulta.
      */
-    public void agendarConsulta(Pet pet, Cliente cliente, Veterinario veterinario, Date data) {
-        Consulta novaConsulta = new Consulta(pet, cliente, veterinario, data);
-        consultaDAO.adicionar(novaConsulta);
-        System.out.println("[Facade] Consulta agendada para '" + pet.getNome() + "' em " + data);
-    }
-
-    /**
-     * Busca e retorna uma lista de todas as consultas agendadas.
-     * @return Uma lista de objetos Consulta.
-     */
-    public List<Consulta> buscarTodasAsConsultas() {
-        return consultaDAO.listarTodos();
-    }
 
     // --- Métodos para Realizar Atendimento e Gerar Prescrições ---
 
@@ -201,10 +222,22 @@ public class ClinicaFacade {
         Diagnostico diagnostico = new Diagnostico(consulta, diagnosticoDescricao);
         Prescricao prescricao = new Prescricao(consulta, medicamentos);
 
+        // Em uma aplicação real, você também salvaria esses objetos nos seus respectivos DAOs (ex: diagnosticoDAO.adicionar(diagnostico); prescricaoDAO.adicionar(prescricao);),
+        // e talvez atualizaria o status da consulta para "finalizada" (ex: consulta.setStatus("finalizada"); consultaDAO.atualizar(consulta);).
+        // Por simplicidade, estamos apenas retornando a prescrição e exibindo no console.
 
         System.out.println("[Facade] Diagnóstico: " + diagnostico.getDescricao());
         System.out.println("[Facade] Prescrição gerada com " + medicamentos.size() + " medicamentos.");
         System.out.println("[Facade] --- Atendimento Finalizado ---");
+
+        // Associa o diagnóstico à prescrição (se ainda não estiver diretamente no construtor)
+        // Isso depende de como você estruturou suas classes Diagnostico e Prescricao.
+        // Se Prescricao precisa de um Diagnostico, assegure-se que o construtor de Prescricao já faça isso
+        // ou que haja um método setDiagnostico() na Prescricao.
+        // Para o exemplo, vamos assumir que Diagnostico e Prescricao são criados independentemente aqui
+        // mas estão logicamente ligados pela 'consulta'. Se Prescricao precisa *ter* o objeto Diagnostico,
+        // o construtor de Prescricao precisaria aceitá-lo.
+        prescricao.setDiagnostico(diagnostico); // Adicionando essa linha para garantir a ligação
 
         return prescricao; // Retorna a prescrição criada
     }

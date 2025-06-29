@@ -2,6 +2,7 @@ package br.com.veterinaria.gui;
 
 import br.com.veterinaria.facade.ClinicaFacade;
 import br.com.veterinaria.model.Cliente;
+import br.com.veterinaria.model.Pet;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -12,174 +13,175 @@ import java.util.List;
 
 public class GerenciarClientesGUI extends JFrame {
     private ClinicaFacade facade;
-
-    // Componentes para Cadastro
-    private JTextField txtNomeCliente;
-    private JTextField txtTelefoneCliente;
-    private JTextField txtEmailCliente;
-    private JButton btnCadastrarCliente;
-
-    // Componentes para Listagem e Remoção
-    private JTable tblClientes;
+    private JTable clientesTable;
     private DefaultTableModel tableModel;
-    private JButton btnRemoverCliente;
+
+    // Componentes para Adicionar Cliente
+    private JTextField txtNome;
+    private JTextField txtTelefone;
+    private JTextField txtEmail;
+    private JButton btnAdicionar;
+
+    // Componente para Remover Cliente
+    private JButton btnRemover;
 
     public GerenciarClientesGUI(ClinicaFacade facade) {
         this.facade = facade;
-        setTitle("Gerenciar Clientes (Proprietários)");
+        setTitle("Gerenciar Clientes");
         setSize(700, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         initComponents();
-        loadTableData(); // Carrega os clientes existentes na tabela
+        loadClientes(); // Carrega clientes na tabela
         addListeners();
     }
 
     private void initComponents() {
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10)); // Painel principal com borda
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // --- Painel de Cadastro ---
-        JPanel cadastroPanel = new JPanel(new GridBagLayout());
-        cadastroPanel.setBorder(BorderFactory.createTitledBorder("Cadastrar Novo Cliente"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        // --- Painel de Adição de Cliente (Superior) ---
+        JPanel adicionarPanel = new JPanel(new GridLayout(4, 2, 10, 5));
+        adicionarPanel.setBorder(BorderFactory.createTitledBorder("Adicionar Novo Cliente"));
 
-        // Nome
-        gbc.gridx = 0; gbc.gridy = 0;
-        cadastroPanel.add(new JLabel("Nome:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 1.0;
-        txtNomeCliente = new JTextField(20);
-        cadastroPanel.add(txtNomeCliente, gbc);
+        adicionarPanel.add(new JLabel("Nome:"));
+        txtNome = new JTextField();
+        adicionarPanel.add(txtNome);
 
-        // Telefone
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
-        cadastroPanel.add(new JLabel("Telefone:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 1.0;
-        txtTelefoneCliente = new JTextField(20);
-        cadastroPanel.add(txtTelefoneCliente, gbc);
+        adicionarPanel.add(new JLabel("Telefone:"));
+        txtTelefone = new JTextField();
+        adicionarPanel.add(txtTelefone);
 
-        // Email
-        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
-        cadastroPanel.add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 1.0;
-        txtEmailCliente = new JTextField(20);
-        cadastroPanel.add(txtEmailCliente, gbc);
+        adicionarPanel.add(new JLabel("Email:"));
+        txtEmail = new JTextField();
+        adicionarPanel.add(txtEmail);
 
-        // Botão Cadastrar
-        gbc.gridx = 0; gbc.gridy = 3;
-        gbc.gridwidth = 2; // Ocupa duas colunas
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER;
-        btnCadastrarCliente = new JButton("Cadastrar Cliente");
-        cadastroPanel.add(btnCadastrarCliente, gbc);
+        btnAdicionar = new JButton("Adicionar Cliente");
+        adicionarPanel.add(new JLabel("")); // Espaçador
+        adicionarPanel.add(btnAdicionar);
 
-        mainPanel.add(cadastroPanel, BorderLayout.NORTH);
+        mainPanel.add(adicionarPanel, BorderLayout.NORTH);
 
-        // --- Painel de Listagem e Remoção ---
-        JPanel listagemPanel = new JPanel(new BorderLayout());
+        // --- Painel de Listagem e Remoção de Clientes (Central/Inferior) ---
+        JPanel listagemPanel = new JPanel(new BorderLayout(10, 10));
         listagemPanel.setBorder(BorderFactory.createTitledBorder("Clientes Cadastrados"));
 
         String[] columnNames = {"ID", "Nome", "Telefone", "Email"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Torna as células não editáveis
+                return false; // Células da tabela não editáveis
             }
         };
-        tblClientes = new JTable(tableModel);
-        JScrollPane scrollPane = new JScrollPane(tblClientes);
+        clientesTable = new JTable(tableModel);
+        clientesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(clientesTable);
         listagemPanel.add(scrollPane, BorderLayout.CENTER);
 
-        btnRemoverCliente = new JButton("Remover Cliente Selecionado");
-        JPanel btnRemoverPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        btnRemoverPanel.add(btnRemoverCliente);
-        listagemPanel.add(btnRemoverPanel, BorderLayout.SOUTH);
+        btnRemover = new JButton("Remover Cliente Selecionado");
+        JPanel removerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        removerPanel.add(btnRemover);
+        listagemPanel.add(removerPanel, BorderLayout.SOUTH);
 
         mainPanel.add(listagemPanel, BorderLayout.CENTER);
 
         add(mainPanel);
     }
 
-    private void loadTableData() {
-        tableModel.setRowCount(0); // Limpa a tabela antes de recarregar
-        List<Cliente> clientes = facade.getClientesCadastrados();
-        for (Cliente cliente : clientes) {
-            Object[] rowData = {cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail()};
-            tableModel.addRow(rowData);
-        }
-    }
-
     private void addListeners() {
-        btnCadastrarCliente.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cadastrarCliente();
-            }
-        });
-
-        btnRemoverCliente.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removerCliente();
-            }
-        });
+        btnAdicionar.addActionListener(e -> adicionarCliente());
+        btnRemover.addActionListener(e -> removerCliente());
     }
 
-    private void cadastrarCliente() {
-        String nome = txtNomeCliente.getText().trim();
-        String telefone = txtTelefoneCliente.getText().trim();
-        String email = txtEmailCliente.getText().trim();
+    /**
+     * Adiciona um novo cliente com base nos dados dos campos de entrada.
+     */
+    private void adicionarCliente() {
+        String nome = txtNome.getText().trim();
+        String telefone = txtTelefone.getText().trim();
+        String email = txtEmail.getText().trim();
 
-        if (nome.isEmpty() || telefone.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Nome e Telefone são obrigatórios.", "Erro de Cadastro", JOptionPane.ERROR_MESSAGE);
+        if (nome.isEmpty() || telefone.isEmpty() || email.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios.", "Erro de Cadastro", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         Cliente novoCliente = new Cliente(nome, telefone, email);
         facade.cadastrarCliente(novoCliente);
-        JOptionPane.showMessageDialog(this, "Cliente cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Cliente '" + nome + "' cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
-        // Limpa os campos e recarrega a tabela
-        txtNomeCliente.setText("");
-        txtTelefoneCliente.setText("");
-        txtEmailCliente.setText("");
-        loadTableData();
+        // Limpa os campos após o cadastro
+        txtNome.setText("");
+        txtTelefone.setText("");
+        txtEmail.setText("");
+        loadClientes(); // Recarrega a tabela para mostrar o novo cliente
     }
 
+    /**
+     * Carrega todos os clientes da ClinicaFacade e os exibe na tabela.
+     */
+    private void loadClientes() {
+        tableModel.setRowCount(0); // Limpa a tabela
+        List<Cliente> clientes = facade.getClientesCadastrados();
+
+        for (Cliente cliente : clientes) {
+            Object[] rowData = {
+                    cliente.getId(),
+                    cliente.getNome(),
+                    cliente.getTelefone(),
+                    cliente.getEmail()
+            };
+            tableModel.addRow(rowData);
+        }
+    }
+
+    /**
+     * Remove o cliente selecionado na tabela.
+     */
     private void removerCliente() {
-        int selectedRow = tblClientes.getSelectedRow();
+        int selectedRow = clientesTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Por favor, selecione um cliente para remover.", "Nenhuma Seleção", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Selecione um cliente para remover.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Obtém o ID do cliente da linha selecionada (assumindo que o ID está na primeira coluna)
-        int clienteId = (int) tableModel.getValueAt(selectedRow, 0);
+        int clienteId = (int) tableModel.getValueAt(selectedRow, 0); // Pega o ID do cliente da linha selecionada
 
-        // Encontra o objeto Cliente correspondente na lista da fachada
         Cliente clienteParaRemover = null;
-        for (Cliente c : facade.getClientesCadastrados()) {
-            if (c.getId() == clienteId) {
-                clienteParaRemover = c;
+        for (Cliente cliente : facade.getClientesCadastrados()) {
+            if (cliente.getId() == clienteId) {
+                clienteParaRemover = cliente;
                 break;
             }
         }
 
         if (clienteParaRemover != null) {
+            // Verifica se o cliente possui pets antes de remover
+            boolean temPets = false;
+            for(Pet pet : facade.getPetsCadastrados()) {
+                if(pet.getProprietario() != null && pet.getProprietario().getId() == clienteParaRemover.getId()) {
+                    temPets = true;
+                    break;
+                }
+            }
+
+            if (temPets) {
+                JOptionPane.showMessageDialog(this, "Não é possível remover este cliente. Ele possui pets cadastrados.", "Erro de Remoção", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             int confirm = JOptionPane.showConfirmDialog(this,
-                    "Tem certeza que deseja remover o cliente " + clienteParaRemover.getNome() + "?",
+                    "Tem certeza que deseja remover o cliente '" + clienteParaRemover.getNome() + "'?",
                     "Confirmar Remoção", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                facade.removerCliente(clienteParaRemover);
+                facade.removerCliente(clienteParaRemover); // Chama a facade para remover
+                loadClientes(); // Recarrega a tabela
                 JOptionPane.showMessageDialog(this, "Cliente removido com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                loadTableData(); // Recarrega a tabela após a remoção
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Cliente não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Erro: Cliente não encontrado para remoção.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
